@@ -14,6 +14,15 @@ public class UserManagementController {
     @Autowired
     private UsersManagementService usersManagementService;
 
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<ReqRes> forgotPassword(@RequestParam String email) {
+        return ResponseEntity.ok(usersManagementService.forgotPassword(email));
+    }
+
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<ReqRes> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        return ResponseEntity.ok(usersManagementService.resetPassword(token, newPassword));
+    }
     @PostMapping("/auth/register")
     public ResponseEntity<ReqRes> regeister(@RequestBody ReqRes reg){
         return ResponseEntity.ok(usersManagementService.register(reg));

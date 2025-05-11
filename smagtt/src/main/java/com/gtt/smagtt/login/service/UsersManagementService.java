@@ -1,17 +1,22 @@
 package com.gtt.smagtt.login.service;
 import com.gtt.smagtt.login.dto.ReqRes;
 import com.gtt.smagtt.login.entity.OurUsers;
+import com.gtt.smagtt.login.entity.PasswordResetToken;
+import com.gtt.smagtt.login.repository.PasswordResetTokenRepository;
 import com.gtt.smagtt.login.repository.UsersRepo;
 import io.jsonwebtoken.Jwts;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class UsersManagementService {
@@ -24,8 +29,109 @@ public class UsersManagementService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private JavaMailSender mailSender;
+
+    public ReqRes forgotPassword(String email) {
+        ReqRes response = new ReqRes();
+        Optional<OurUsers> optionalUser = usersRepo.findByEmail(email);
+
+        if (optionalUser.isPresent()) {
+            OurUsers user = optionalUser.get();
+
+            // Delete existing token if any
+            passwordResetTokenRepository.findByUser(user).ifPresent(existingToken -> {
+                passwordResetTokenRepository.delete(existingToken);
+            });
+
+            // Generate a new 6-digit token
+            String token = generateUnique6DigitToken();
+            PasswordResetToken resetToken = new PasswordResetToken();
+            resetToken.setToken(token);
+            resetToken.setUser(user);
+            resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
+
+            passwordResetTokenRepository.save(resetToken);
+
+            // Send only the token in styled format with user's name
+            emailService.sendPasswordResetEmail(user.getEmail(), token, user.getName());
+
+            response.setMessage("Password reset token sent to email.");
+            response.setStatusCode(200);
+        } else {
+            response.setMessage("User not found with this email.");
+            response.setStatusCode(404);
+        }
+
+        return response;
+    }
+    public void sendPasswordResetEmail(String toEmail, String token, String fullName) {
+        String subject = "Your Password Reset Token";
+
+        String message = "<html><body>"
+                + "<p>Dear " + fullName + ",</p>"
+                + "<p>You have requested to reset your password. Use the following token to proceed:</p>"
+                + "<p style='font-size: 28px; font-weight: bold; color: #2E86C1;'>" + token + "</p>"
+                + "<p>This token will expire in 1 hour.</p>"
+                + "<p>If you did not request a password reset, you can safely ignore this email.</p>"
+                + "<br><p>Best regards,<br>Support Team</p>"
+                + "</body></html>";
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(message, true); // Enable HTML
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
 
 
+
+    private String generateUnique6DigitToken() {
+        String token;
+        Random random = new Random();
+        do {
+            token = String.format("%06d", random.nextInt(900000) + 100000);
+        } while (passwordResetTokenRepository.existsByToken(token)); // Ensure uniqueness
+        return token;
+    }
+
+
+    public ReqRes resetPassword(String token, String newPassword) {
+        ReqRes response = new ReqRes();
+        Optional<PasswordResetToken> tokenOptional = passwordResetTokenRepository.findByToken(token);
+
+        if (tokenOptional.isPresent()) {
+            PasswordResetToken resetToken = tokenOptional.get();
+
+            if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+                response.setMessage("Token has expired.");
+                response.setStatusCode(400);
+                return response;
+            }
+
+            OurUsers user = resetToken.getUser();
+            user.setPassword(passwordEncoder.encode(newPassword));
+            usersRepo.save(user);
+
+            response.setMessage("Password reset successful.");
+            response.setStatusCode(200);
+        } else {
+            response.setMessage("Invalid token.");
+            response.setStatusCode(404);
+        }
+
+        return response;
+    }
     public ReqRes register(ReqRes registrationRequest){
         ReqRes resp = new ReqRes();
 
