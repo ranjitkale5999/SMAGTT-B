@@ -16,12 +16,13 @@ public class addDailyTradeCotroller {
     private DailyTradeServices dailyTradeServices;
 
     @PostMapping()
-    public DailyTrade addDailyTrade(@RequestBody DailyTrade dailyTrade){
-        return dailyTradeServices.addDailyTrade(dailyTrade);
+    public DailyTradeDto addDailyTrade(@RequestBody DailyTradeDto dailyTradeDto){
+        return dailyTradeServices.addDailyTrade(dailyTradeDto);
     }
 
     @GetMapping
-    public List<DailyTrade> getDailyTradeList(){
+    public List<DailyTradeDto> getDailyTradeList(){
         return dailyTradeServices.getDailyTradeList();
     }
+
 }
