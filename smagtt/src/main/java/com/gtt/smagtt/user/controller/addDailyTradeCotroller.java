@@ -1,8 +1,8 @@
 package com.gtt.smagtt.user.controller;
 
 import com.gtt.smagtt.user.dto.DailyTradeDto;
-import com.gtt.smagtt.user.entity.DailyTrade;
 import com.gtt.smagtt.user.services.DailyTradeServices;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ public class addDailyTradeCotroller {
     private DailyTradeServices dailyTradeServices;
 
     @PostMapping()
-    public DailyTradeDto addDailyTrade(@RequestBody DailyTradeDto dailyTradeDto) {
+    public DailyTradeDto addDailyTrade(@Valid @RequestBody DailyTradeDto dailyTradeDto) {
         return dailyTradeServices.addDailyTrade(dailyTradeDto);
     }
 

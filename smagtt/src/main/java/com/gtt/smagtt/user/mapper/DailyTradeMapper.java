@@ -20,15 +20,3 @@ public interface DailyTradeMapper {
 
     List<DailyTrade> mapToDailyTradeList(List<DailyTradeDto> dailyTradeDtos);
 }
-//@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-//@Mapper(componentModel = "spring")
-//public interface DailyTradeMapper {
-//
-//    DailyTradeDto mapToDailyTradeDto(DailyTrade dailyTrade);
-//
-//    DailyTrade mapToDailyTrade(DailyTradeDto dailyTradeDto);
-//
-//    List<DailyTradeDto> mapToDailyTradeDtoList(List<DailyTrade> dailyTrades);
-//
-//    List<DailyTrade> mapToDailyTradeList(List<DailyTradeDto> dailyTradeDtos);
-//}
