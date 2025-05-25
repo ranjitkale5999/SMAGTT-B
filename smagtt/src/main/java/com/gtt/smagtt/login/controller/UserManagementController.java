@@ -1,8 +1,10 @@
 package com.gtt.smagtt.login.controller;
 
+import com.gtt.smagtt.exception.ErrorResponse;
 import com.gtt.smagtt.login.dto.ReqRes;
 import com.gtt.smagtt.login.entity.OurUsers;
 import com.gtt.smagtt.login.service.UsersManagementService;
+import com.gtt.smagtt.user.dto.DailyTradeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ public class UserManagementController {
     public ResponseEntity<ReqRes> forgotPassword(@RequestParam String email) {
         return ResponseEntity.ok(usersManagementService.forgotPassword(email));
     }
+
 
     @PostMapping("/auth/reset-password")
     public ResponseEntity<ReqRes> resetPassword(@RequestParam String token, @RequestParam String newPassword) {

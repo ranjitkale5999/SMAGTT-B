@@ -1,13 +1,18 @@
 package com.gtt.smagtt.user.controller;
 
+import com.gtt.smagtt.exception.ErrorResponse;
 import com.gtt.smagtt.user.dto.DailyTradeDto;
+import com.gtt.smagtt.user.entity.DailyTrade;
 import com.gtt.smagtt.user.services.DailyTradeServices;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -17,32 +22,80 @@ public class addDailyTradeCotroller {
     private DailyTradeServices dailyTradeServices;
 
     @PostMapping()
-    public DailyTradeDto addDailyTrade(@Valid @RequestBody DailyTradeDto dailyTradeDto) {
-        return dailyTradeServices.addDailyTrade(dailyTradeDto);
+    public ResponseEntity<ErrorResponse<DailyTradeDto>> addDailyTrade(@Valid @RequestBody DailyTradeDto dailyTradeDto) {
+        DailyTradeDto dailyTradeDtosave = dailyTradeServices.addDailyTrade(dailyTradeDto);
+
+        ErrorResponse<DailyTradeDto> response = new ErrorResponse<>(
+                LocalDateTime.now(),
+                HttpStatus.CREATED.value(),
+                "Daily Trade created successfully",
+                dailyTradeDtosave
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<DailyTradeDto> getDailyTradeList() {
-        return dailyTradeServices.getDailyTradeList();
+    public ResponseEntity<ErrorResponse<List<DailyTradeDto>>> getDailyTradeList() {
+        List<DailyTradeDto> dailyTrade = dailyTradeServices.getDailyTradeList();
+
+        ErrorResponse<List<DailyTradeDto>> response = new ErrorResponse<>(
+                LocalDateTime.now(),
+                HttpStatus.OK.value(),
+                "Daily Trade List successfully",
+                dailyTrade
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public DailyTradeDto getByIdDailyTrade(@PathVariable Long id) {
-        return dailyTradeServices.getByIdDailyTrade(id);
+    public ResponseEntity<ErrorResponse<DailyTradeDto>> getByIdDailyTrade(@PathVariable Long id) {
+        DailyTradeDto dailyTradeDto = dailyTradeServices.getByIdDailyTrade(id);
+
+        ErrorResponse<DailyTradeDto> response = new ErrorResponse<>(
+                LocalDateTime.now(),
+                HttpStatus.OK.value(),
+                "Daily Trade with ID " + id + " retrieved successfully",
+                dailyTradeDto
+        );
+        return ResponseEntity.ok(response);
+
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteTrade(@PathVariable Long id) {
-        return dailyTradeServices.delete(id);
+    public ResponseEntity<ErrorResponse<Object>> deleteDailyTrade(@PathVariable Long id) {
+        dailyTradeServices.delete(id);
+
+        ErrorResponse<Object> response = new ErrorResponse<>(
+                LocalDateTime.now(),
+                HttpStatus.OK.value(),
+                "Teacher deleted successfully with ID: " + id,
+                null
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DailyTradeDto> updateDailyTrade(
+//    public ResponseEntity<DailyTradeDto> updateDailyTrade(
+//            @PathVariable long id,
+//            @RequestBody DailyTradeDto dailyTradeDto) {
+//
+//        DailyTradeDto updated = dailyTradeServices.updateDailyTrade(id, dailyTradeDto);
+//        return ResponseEntity.ok(updated);
+//    }
+    public ResponseEntity<ErrorResponse<DailyTradeDto>> updateDailyTrade(
             @PathVariable long id,
             @RequestBody DailyTradeDto dailyTradeDto) {
-
         DailyTradeDto updated = dailyTradeServices.updateDailyTrade(id, dailyTradeDto);
-        return ResponseEntity.ok(updated);
+        ErrorResponse<DailyTradeDto> response = new ErrorResponse<>(
+                LocalDateTime.now(),
+                HttpStatus.OK.value(),
+                "Teacher updated successfully with ID: " + id,
+                updated
+        );
+
+        return ResponseEntity.ok(response);
     }
 
 }
