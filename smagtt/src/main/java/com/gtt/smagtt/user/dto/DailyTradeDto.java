@@ -32,5 +32,7 @@ public class DailyTradeDto {
     @PastOrPresent(message = "Trade date must be in the past or present")
     private LocalDateTime tradeDate;
 
+    private boolean isDeleted;
+    private boolean isActive;
 
 }

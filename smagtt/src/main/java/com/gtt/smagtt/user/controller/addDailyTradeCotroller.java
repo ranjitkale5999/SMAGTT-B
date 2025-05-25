@@ -62,28 +62,44 @@ public class addDailyTradeCotroller {
 
     }
 
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<ErrorResponse<Object>> deleteDailyTrade(@PathVariable Long id) {
+//        dailyTradeServices.delete(id);
+//
+//        ErrorResponse<Object> response = new ErrorResponse<>(
+//                LocalDateTime.now(),
+//                HttpStatus.OK.value(),
+//                "Teacher deleted successfully with ID: " + id,
+//                null
+//        );
+//
+//        return ResponseEntity.ok(response);
+//    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ErrorResponse<Object>> deleteDailyTrade(@PathVariable Long id) {
-        dailyTradeServices.delete(id);
+        boolean deleted = dailyTradeServices.delete(id);
+
+        if (!deleted) {
+            ErrorResponse<Object> response = new ErrorResponse<>(
+                    LocalDateTime.now(),
+                    HttpStatus.NOT_FOUND.value(),
+                    "DailyTrade not found with ID: " + id,
+                    null
+            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
 
         ErrorResponse<Object> response = new ErrorResponse<>(
                 LocalDateTime.now(),
                 HttpStatus.OK.value(),
-                "Teacher deleted successfully with ID: " + id,
+                "DailyTrade soft-deleted successfully with ID: " + id,
                 null
         );
-
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-//    public ResponseEntity<DailyTradeDto> updateDailyTrade(
-//            @PathVariable long id,
-//            @RequestBody DailyTradeDto dailyTradeDto) {
-//
-//        DailyTradeDto updated = dailyTradeServices.updateDailyTrade(id, dailyTradeDto);
-//        return ResponseEntity.ok(updated);
-//    }
     public ResponseEntity<ErrorResponse<DailyTradeDto>> updateDailyTrade(
             @PathVariable long id,
             @RequestBody DailyTradeDto dailyTradeDto) {

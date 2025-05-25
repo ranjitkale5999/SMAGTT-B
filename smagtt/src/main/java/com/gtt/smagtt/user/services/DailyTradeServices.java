@@ -20,6 +20,8 @@ public class DailyTradeServices {
     public DailyTradeDto addDailyTrade(DailyTradeDto dailyTradeDto) {
         //  Entity to Dto
         DailyTrade dailyTrade = dailyTradeMapper.mapToDailyTrade(dailyTradeDto);
+        dailyTrade.setDeleted(false);
+        dailyTrade.setActive(true);
         // Save entity
         DailyTrade saved = dailyTradeRepo.save(dailyTrade);
         // Convert saved entity back to DTO and return
@@ -41,7 +43,9 @@ public class DailyTradeServices {
     public boolean delete(Long id) {
         return dailyTradeRepo.findById(id)
                 .map(trade -> {
-                    dailyTradeRepo.delete(trade);
+                    trade.setDeleted(true);
+                    trade.setActive(false);
+                    dailyTradeRepo.save(trade);
                     return true;
                 })
                 .orElse(false);

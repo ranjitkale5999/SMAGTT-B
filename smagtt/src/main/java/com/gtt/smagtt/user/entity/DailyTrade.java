@@ -24,5 +24,8 @@ public class DailyTrade {
     private double gannLevel;
     private LocalDateTime tradeDate;
 
+    private boolean isDeleted = false;
+    private boolean isActive = true;
+
 
 }
