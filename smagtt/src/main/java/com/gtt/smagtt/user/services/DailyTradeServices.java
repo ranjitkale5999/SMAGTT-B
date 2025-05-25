@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DailyTradeServices {
@@ -31,36 +30,5 @@ public class DailyTradeServices {
     public List<DailyTradeDto> getDailyTradeList() {
         List<DailyTrade> dailyTradeList = dailyTradeRepo.findAll();
         return dailyTradeMapper.mapToDailyTradeDtoList(dailyTradeList);
-    }
-
-    public DailyTradeDto getByIdDailyTrade(Long id) {
-        DailyTrade dailyTrade = dailyTradeRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("DailyTrade not found with id: " + id));
-        return dailyTradeMapper.mapToDailyTradeDto(dailyTrade);
-    }
-    public boolean delete(Long id) {
-        return dailyTradeRepo.findById(id)
-                .map(trade -> {
-                    dailyTradeRepo.delete(trade);
-                    return true;
-                })
-                .orElse(false);
-    }
-
-    public DailyTradeDto updateDailyTrade(long id, DailyTradeDto dailyTradeDto) {
-        DailyTrade existing = dailyTradeRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("DailyTrade not found with id: " + id));
-
-        // Update fields explicitly to avoid overwriting ID or other unwanted fields
-        existing.setShareName(dailyTradeDto.getName());
-        existing.setPrice(dailyTradeDto.getPrice());
-        existing.setPriceBuy(dailyTradeDto.getPriceBuy());
-        existing.setPriceSell(dailyTradeDto.getPriceSell());
-        existing.setTarget(dailyTradeDto.getTarget());
-        existing.setGannLevel(dailyTradeDto.getGannLevel());
-        existing.setTradeDate(dailyTradeDto.getTradeDate());
-
-        DailyTrade updated = dailyTradeRepo.save(existing);
-        return dailyTradeMapper.mapToDailyTradeDto(updated);
     }
 }
