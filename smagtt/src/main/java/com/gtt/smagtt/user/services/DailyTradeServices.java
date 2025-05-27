@@ -7,6 +7,7 @@ import com.gtt.smagtt.user.repo.DailyTradeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,19 +25,30 @@ public class DailyTradeServices {
         dailyTrade.setActive(true);
         // Save entity
         DailyTrade saved = dailyTradeRepo.save(dailyTrade);
-        // Convert saved entity back to DTO and return
 
         return dailyTradeMapper.mapToDailyTradeDto(saved);
     }
 
     public List<DailyTradeDto> getDailyTradeList() {
         List<DailyTrade> dailyTradeList = dailyTradeRepo.findAll();
+        for(DailyTrade dailyTrade1:dailyTradeList){
+            if (dailyTrade1.getYear() > 0 && dailyTrade1.getMonth() > 0 && dailyTrade1.getDay() > 0) {
+                LocalDate date = LocalDate.of(dailyTrade1.getYear(), dailyTrade1.getMonth(), dailyTrade1.getDay());
+                dailyTrade1.setDate(date); // This sets the transient field
+            }
+            }
         return dailyTradeMapper.mapToDailyTradeDtoList(dailyTradeList);
     }
 
     public DailyTradeDto getByIdDailyTrade(Long id) {
         DailyTrade dailyTrade = dailyTradeRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("DailyTrade not found with id: " + id));
+
+            if (dailyTrade.getYear() > 0 && dailyTrade.getMonth() > 0 && dailyTrade.getDay() > 0) {
+                LocalDate date = LocalDate.of(dailyTrade.getYear(), dailyTrade.getMonth(), dailyTrade.getDay());
+                dailyTrade.setDate(date); // This sets the transient field
+            }
+
         return dailyTradeMapper.mapToDailyTradeDto(dailyTrade);
     }
 
@@ -61,7 +73,7 @@ public class DailyTradeServices {
         existing.setTarget(dailyTradeDto.getTarget());
         existing.setGannLevel(dailyTradeDto.getGannLevel());
         existing.setTradeDate(dailyTradeDto.getTradeDate());
-
+        existing.setDate(dailyTradeDto.getDate());
         DailyTrade updated = dailyTradeRepo.save(existing);
         return dailyTradeMapper.mapToDailyTradeDto(updated);
     }
